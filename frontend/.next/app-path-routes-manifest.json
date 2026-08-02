@@ -1,0 +1,17 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/admission-form/page": "/admission-form",
+  "/admissions/page": "/admissions",
+  "/contact/page": "/contact",
+  "/dashboard/admin/page": "/dashboard/admin",
+  "/dashboard/faculty/page": "/dashboard/faculty",
+  "/dashboard/student/page": "/dashboard/student",
+  "/departments/[dept]/page": "/departments/[dept]",
+  "/downloads/page": "/downloads",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/page": "/",
+  "/placements/page": "/placements",
+  "/research/page": "/research"
+}
