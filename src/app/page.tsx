@@ -47,17 +47,27 @@ export default async function HomePage() {
     labs: "45+"
   });
 
-  // Fetch notices
-  const notices = await prisma.notice.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 5
-  });
+  // Fetch notices safely
+  let notices: any[] = [];
+  try {
+    notices = await prisma.notice.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5
+    });
+  } catch (err) {
+    console.error("Failed to fetch notices:", err);
+  }
 
-  // Fetch events
-  const events = await prisma.event.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 3
-  });
+  // Fetch events safely
+  let events: any[] = [];
+  try {
+    events = await prisma.event.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 3
+    });
+  } catch (err) {
+    console.error("Failed to fetch events:", err);
+  }
 
   const recruiters = [
     { name: "TCS", logo: "https://placehold.co/120x60/f1f5f9/0b4c8c?text=TCS" },
