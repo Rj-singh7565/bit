@@ -19,12 +19,8 @@
       }
     ],
     "paths": {
-      "src/*": ["./frontend/src/*", "./src/*"],
-      "@/*": ["./frontend/src/*", "./src/*"],
-      "ui/*": ["./ui/*"],
-      "@/ui/*": ["./ui/*"],
-      "src/components/*": ["./ui/*"],
-      "@/components/*": ["./ui/*"]
+      "src/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": [
