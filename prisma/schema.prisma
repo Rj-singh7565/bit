@@ -1,0 +1,167 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  bitId     String   @unique // e.g. BIT-STUDENT-2026-001, BIT-FACULTY-101, BIT-ADMIN-001
+  name      String
+  email     String   @unique
+  password  String   // Hashed password
+  role      String   // STUDENT, FACULTY, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  facultyProfile FacultyProfile?
+  auditLogs      AuditLog[]
+}
+
+model StudentProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentNo   String   @unique
+  department     String   // e.g. Computer Science Engineering, Civil Engineering, Mechanical Engineering, Electronics & Communication Engineering
+  branch         String   // e.g. CSE, CSE-AIML, CSE-DS, CE, ME, ECE
+  semester       Int      @default(1)
+  attendancePct  Float    @default(85.0)
+  feeBalance     Float    @default(45000.0)
+  feeStatus      String   @default("PENDING") // PENDING, PAID, OVERDUE
+  hostelRoom     String?  // e.g. H3-302, null if day-scholar
+  busRoute       String?  // e.g. Route-5, null if none
+  cgpa           Float    @default(0.0)
+  placementStatus String  @default("UNPLACED") // UNPLACED, PLACED, APPLIED
+  resumeUrl      String?
+
+  payments       FeePayment[]
+  grades         SemesterGrade[]
+  bookIssues     BookIssue[]
+  applications   PlacementApplication[]
+}
+
+model FacultyProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  designation    String   // e.g. Assistant Professor, HOD
+  department     String   // e.g. Computer Science Engineering
+  specialization String
+  cabinNumber    String
+  leaveBalance   Int      @default(12)
+
+  classesTaught  String   // JSON string of classes, e.g. ["B.Tech CSE Sem 3", "B.Tech CSE Sem 5"]
+}
+
+model FeePayment {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount        Float
+  category      String   // Tuition Fee, Hostel Fee, Library Fee, Exam Fee
+  status        String   // PAID, FAILED, REFUNDED
+  transactionId String   @unique
+  paymentMethod String
+  receiptUrl    String?
+  paidAt        DateTime @default(now())
+}
+
+model SemesterGrade {
+  id         String   @id @default(uuid())
+  studentId  String
+  student    StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  semester   Int
+  subjectCode String
+  subjectName String
+  internalMarks Float
+  externalMarks Float?
+  totalMarks   Float
+  grade        String   // e.g. A+, A, B, C
+}
+
+model Notice {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  pdfUrl      String?
+  category    String   // ACADEMIC, PLACEMENT, ADMISSION, GENERAL
+  pinned      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  date        String
+  imageUrl    String?
+  category    String   // CULTURAL, TECHFEST, SPORTS, SEMINAR
+  createdAt   DateTime @default(now())
+}
+
+model Book {
+  id              String   @id @default(uuid())
+  isbn            String   @unique
+  title           String
+  author          String
+  department      String   // CSE, ME, ECE, CE, Science
+  copiesAvailable Int      @default(1)
+  totalCopies     Int      @default(1)
+
+  issues          BookIssue[]
+}
+
+model BookIssue {
+  id          String   @id @default(uuid())
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  issueDate   DateTime @default(now())
+  dueDate     DateTime
+  returnDate  DateTime?
+  fineAmount  Float    @default(0.0)
+}
+
+model PlacementJob {
+  id          String   @id @default(uuid())
+  companyName String
+  role        String
+  packageLpa  Float
+  eligibility String   // e.g. CSE, ECE (65% Min)
+  jobDesc     String
+  deadline    DateTime
+
+  applications PlacementApplication[]
+}
+
+model PlacementApplication {
+  id             String   @id @default(uuid())
+  jobId          String
+  job            PlacementJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status         String   // APPLIED, SHORTLISTED, INTERVIEWING, OFFERED, REJECTED
+  resumeUrl      String
+  appliedAt      DateTime @default(now())
+}
+
+model CMSContent {
+  id    String @id
+  value String // JSON string
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // e.g. USER_LOGIN, FEE_PAYMENT, CMS_UPDATE
+  details   String   // Details of the action (JSON or string)
+  ipAddress String
+  createdAt DateTime @default(now())
+}
